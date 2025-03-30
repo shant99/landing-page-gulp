@@ -1,0 +1,56 @@
+*,
+*::before,
+*::after,
+html {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+html {
+	font-size: 10px;
+}
+
+body {
+	margin: 0;
+}
+
+.scroll-container {
+	position: relative;
+	border: 0.1rem solid red;
+}
+
+.text-pin-section {
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	background: black;
+	color: gray;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 2.4rem;
+	padding: 4rem;
+	line-height: 1.6;
+	z-index: 2;
+}
+
+.letter {
+	color: gray;
+	transition: color 0.1s linear;
+}
+
+.next-section {
+	height: 200vh;
+	background: white;
+}
+
+.prev-container {
+	height: 100vh;
+	border: 1px solid yellow;
+}
+
+.next-container {
+	height: 100vh;
+	border: 0.1rem solid blue;
+}
