@@ -5,7 +5,7 @@ const inject = require("gulp-inject");
 const concat = require("gulp-concat");
 const fsExtra = require("fs-extra");
 const fs = require("fs");
-const clean = require("gulp-clean");
+const gulpClean = require("gulp-clean");
 
 const paths = {
 	html: {
@@ -84,4 +84,17 @@ function scripts() {
 		.pipe(notify({ message: "JS собран!", onLast: true }));
 }
 
-exports.default = parallel(html, styles, scripts, images, watchFiles);
+function clean(cb) {
+	if (fs.existsSync("./dist/")) {
+		return src("./dist/", { read: false }).pipe(gulpClean({ force: true }));
+	}
+
+	cb();
+}
+
+exports.clean = clean;
+
+exports.default = series(
+	clean,
+	parallel(html, styles, scripts, images, watchFiles)
+);
