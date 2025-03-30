@@ -1,4 +1,3 @@
-// 📌 Основная папка для сборки
 const buildPath = "build/";
 
 const paths = {
