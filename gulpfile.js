@@ -2,6 +2,10 @@ const { src, dest, series, parallel, watch } = require("gulp");
 const notify = require("gulp-notify");
 const sass = require("gulp-sass")(require("sass"));
 const inject = require("gulp-inject");
+const concat = require("gulp-concat");
+const fsExtra = require("fs-extra");
+const fs = require("fs");
+const clean = require("gulp-clean");
 
 const paths = {
 	html: {
@@ -16,16 +20,31 @@ const paths = {
 		watch: "src/scss/**/*.scss",
 	},
 	scripts: {
-		src: "",
-		dest: "dist/js/",
-		watch: "",
+		src: [
+			"./src/js/libs/**/*.js",
+			"./src/js/utils/**/*.js",
+			"./src/js/globals/**/*.js",
+			"./src/js/components/**/*.js",
+			"./src/js/app.js",
+		],
+		dest: "./dist/js/",
+		watch: "./src/js/**/*.js",
 	},
-	dist: "./dist",
+	assets: {
+		images: {
+			src: "src/assets/images",
+			dest: "dist/assets/images",
+			watch: "src/assets/images/*",
+		},
+	},
+	dest: "./dist",
 };
 
 function watchFiles() {
 	watch([paths.html.watch, paths.components], html);
 	watch(paths.css.watch, styles);
+	watch(paths.assets.images.watch, images);
+	watch(paths.scripts.watch, scripts);
 }
 
 function html() {
@@ -37,7 +56,7 @@ function html() {
 				transform: (_, file) => file.contents.toString("utf8"),
 			})
 		)
-		.pipe(dest(paths.dist));
+		.pipe(dest(paths.dest));
 }
 
 function styles() {
@@ -47,12 +66,22 @@ function styles() {
 		.pipe(notify({ message: "CSS скомпилирован!", onLast: true }));
 }
 
+function images(done) {
+	fsExtra
+		.copy(paths.assets.images.src, paths.assets.images.dest, {
+			overwrite: true,
+			errorOnExist: false,
+			preserveTimestamps: true,
+		})
+		.then(() => done())
+		.catch((err) => done(err));
+}
+
 function scripts() {
-	return src();
+	return src(paths.scripts.src)
+		.pipe(concat("app.js"))
+		.pipe(dest(paths.scripts.dest))
+		.pipe(notify({ message: "JS собран!", onLast: true }));
 }
 
-function images() {
-	return;
-}
-
-exports.default = series(parallel(html, styles), watchFiles);
+exports.default = parallel(html, styles, scripts, images, watchFiles);
