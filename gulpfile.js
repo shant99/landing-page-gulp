@@ -6,6 +6,9 @@ const concat = require("gulp-concat");
 const fsExtra = require("fs-extra");
 const fs = require("fs");
 const gulpClean = require("gulp-clean");
+const sourceMaps = require("gulp-sourcemaps");
+const gulpPlumber = require("gulp-plumber");
+const babel = require("gulp-babel");
 
 const paths = {
 	html: {
@@ -37,7 +40,7 @@ const paths = {
 			watch: "src/assets/images/*",
 		},
 	},
-	dest: "./dist",
+	dest: "./dist/",
 };
 
 function watchFiles() {
@@ -46,6 +49,16 @@ function watchFiles() {
 	watch(paths.assets.images.watch, images);
 	watch(paths.scripts.watch, scripts);
 }
+
+const plumberNotify = (title) => {
+	return {
+		errorHandler: notify.onError({
+			title,
+			message: "Error <%= error.message %>",
+			sound: false,
+		}),
+	};
+};
 
 function html() {
 	return src(paths.html.src)
@@ -61,7 +74,10 @@ function html() {
 
 function styles() {
 	return src(paths.css.src)
+		.pipe(gulpPlumber(plumberNotify("Styles")))
+		.pipe(sourceMaps.init())
 		.pipe(sass().on("error", sass.logError))
+		.pipe(sourceMaps.write())
 		.pipe(dest(paths.css.dest))
 		.pipe(notify({ message: "CSS скомпилирован!", onLast: true }));
 }
@@ -79,14 +95,20 @@ function images(done) {
 
 function scripts() {
 	return src(paths.scripts.src)
+		.pipe(gulpPlumber(plumberNotify("JS")))
+		.pipe(
+			babel({
+				presets: ["@babel/preset-env"], // настройка Babel
+			})
+		)
 		.pipe(concat("app.js"))
 		.pipe(dest(paths.scripts.dest))
 		.pipe(notify({ message: "JS собран!", onLast: true }));
 }
 
 function clean(cb) {
-	if (fs.existsSync("./dist/")) {
-		return src("./dist/", { read: false }).pipe(gulpClean({ force: true }));
+	if (fs.existsSync(paths.dest)) {
+		return src(paths.dest, { read: false }).pipe(gulpClean({ force: true }));
 	}
 
 	cb();
