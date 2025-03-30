@@ -1,3 +1,5 @@
+@use "../base/variables" as *;
+
 *,
 *::before,
 *::after,
@@ -9,10 +11,12 @@ html {
 
 html {
 	font-size: 10px;
+	color: var(--color-primary);
 }
 
 body {
 	margin: 0;
+	font-size: 1.6rem;
 }
 
 .scroll-container {
